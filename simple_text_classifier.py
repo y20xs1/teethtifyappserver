@@ -2,67 +2,68 @@ import os
 import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-import numpy as np
 
 LABELS = ["Extraction", "Filling", "Root Canal", "Cleaning", "Initial Checkup", "Other"]
 
+# أمثلة كثيرة وواضحة لكل فئة
 train_texts = [
-    # Extraction (10)
+    # Extraction
     "My tooth is loose and needs to be pulled.",
     "I need to have my tooth removed.",
     "My wisdom tooth is causing problems and should be extracted.",
     "My tooth is broken and cannot be saved.",
+    "I have a tooth that must be taken out.",
+    "My dentist said I need a tooth extraction.",
     "My tooth is fractured below the gum line.",
-    "extraction",
-    "remove tooth",
-    "pull my tooth",
-    "tooth extraction",
-    "tooth pulled",
-    # Filling (10)
+    "My tooth is beyond repair and needs removal.",
+    "My tooth is severely decayed and must be pulled.",
+    "My tooth is making my jaw swell and needs to be removed.",
+
+    # Filling
     "I have a cavity in my tooth.",
     "My tooth hurts when I eat sweets.",
     "I need a filling for my tooth.",
     "There is a small hole in my tooth.",
-    "filling",
-    "tooth filling",
-    "fill my tooth",
-    "cavity filling",
-    "I need a dental filling.",
-    "tooth has a cavity",
-    # Root Canal (10)
+    "My tooth is sensitive to cold drinks.",
+    "I have a decayed tooth that needs a filling.",
+    "My tooth is chipped and needs a filling.",
+    "My tooth hurts when I eat chocolate.",
+    "I have a tooth with a cavity that needs to be filled.",
+    "My tooth is hurting and has a small hole.",
+    # Root Canal
     "My tooth pain is deep and throbbing, especially at night.",
     "I have pain radiating from my tooth to my ear.",
-    "root canal",
-    "canal treatment",
-    "I need a root canal.",
-    "tooth root canal",
-    "root canal therapy",
-    "canal",
-    "root",
-    "nerve treatment",
-    # Cleaning (10)
+    "My tooth is sensitive to hot and cold and the pain is severe.",
+    "I have a severe toothache that keeps me awake.",
+    "My tooth hurts badly and the pain is deep.",
+    "My tooth is throbbing and keeps me awake.",
+    "I have a tooth that hurts when I bite down and the pain lingers.",
+    "My tooth is aching and the pain is constant.",
+    "I have a tooth that is sensitive to pressure and the pain is sharp.",
+    "My tooth is hurting and the pain is intense and deep.",
+    # Cleaning
     "I want a dental cleaning.",
     "I need my teeth cleaned.",
-    "cleaning",
-    "teeth cleaning",
-    "professional cleaning",
-    "scaling",
-    "polishing",
-    "remove tartar",
+    "I want to remove tartar from my teeth.",
+    "I want a professional cleaning.",
     "I want to whiten my teeth.",
-    "book a cleaning appointment",
-    # Initial Checkup (10)
+    "cleaning",
+    "I want to polish my teeth.",
+    "I want to get rid of stains on my teeth.",
+    "I want a scaling and polishing.",
+    "I want to book a cleaning appointment.",
+    # Initial Checkup
     "I want a dental checkup.",
     "I need a routine dental exam.",
-    "checkup",
-    "dental checkup",
-    "teeth checkup",
+    "I want to see a dentist for a checkup.",
+    "I want to make sure my teeth are healthy.",
+    "I want a regular dental checkup.",
+    "I want to schedule a dental exam.",
     "I want to get my teeth checked.",
-    "consultation",
-    "I want to see a dentist.",
-    "book a checkup",
-    "schedule a dental exam",
-    # Other (10)
+    "I want to have a dental checkup.",
+    "I want to book a dental checkup.",
+    "I want to get a dental exam.",
+    # Other
     "hello",
     "weather is nice",
     "I like pizza",
@@ -83,39 +84,31 @@ train_labels = (
     [5]*10    # Other
 )
 
+# 1. تحويل النصوص إلى ميزات رقمية
 vectorizer = TfidfVectorizer(lowercase=True)
 X = vectorizer.fit_transform(train_texts)
+
+# 2. تدريب النموذج
 clf = LogisticRegression(max_iter=1000)
 clf.fit(X, train_labels)
 
+# 3. حفظ النموذج والفيكتورايزر
 os.makedirs('simple_model', exist_ok=True)
 joblib.dump(clf, 'simple_model/model.joblib')
 joblib.dump(vectorizer, 'simple_model/vectorizer.joblib')
 joblib.dump(LABELS, 'simple_model/labels.joblib')
 
+# 4. دالة التنبؤ
 def predict(text):
     X_test = vectorizer.transform([text])
-    proba = clf.predict_proba(X_test)[0]
-    pred = np.argmax(proba)
-    confidence = proba[pred]
-    # إذا الثقة أقل من 0.5 اعتبرها Other
-    if confidence < 0.5:
-        return "Other", float(confidence)
-    return LABELS[pred], float(confidence)
+    pred = clf.predict(X_test)[0]
+    return LABELS[pred]
 
-# اختبر النموذج
-if __name__ == '__main__':
-    for test in [
-        "I want a dental cleaning",
-        "My tooth is loose and needs to be pulled.",
-        "hello",
-        "I have a cavity in my tooth.",
-        "My tooth pain is deep and throbbing, especially at night.",
-        "I want a dental checkup.",
-        "I love programming.",
-        "root",
-        "canal",
-        "pizzza",
-        "nonsense"
-    ]:
-        print(f"{test} => {predict(test)}")
+# أمثلة اختبار
+print(predict("I want a dental cleaning"))         # Cleaning
+print(predict("My tooth is loose and needs to be pulled."))  # Extraction
+print(predict("hello"))                            # Other
+print(predict("I have a cavity in my tooth."))     # Filling
+print(predict("My tooth pain is deep and throbbing, especially at night.")) # Root Canal
+print(predict("I want a dental checkup."))         # Initial Checkup
+print(predict("I love programming."))              # Other 
