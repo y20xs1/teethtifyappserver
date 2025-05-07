@@ -4,7 +4,6 @@ from pydantic import BaseModel
 import joblib
 import os
 
-# تحميل النموذج والفيكتورايزر والليبلات
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "simple_model")
 clf = joblib.load(os.path.join(MODEL_DIR, 'model.joblib'))
 vectorizer = joblib.load(os.path.join(MODEL_DIR, 'vectorizer.joblib'))
@@ -12,7 +11,6 @@ LABELS = joblib.load(os.path.join(MODEL_DIR, 'labels.joblib'))
 
 app = FastAPI()
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,14 +25,11 @@ class TextInput(BaseModel):
 @app.post("/predict")
 async def predict(input_data: TextInput):
     X_test = vectorizer.transform([input_data.text])
-    pred = clf.predict(X_test)[0]
-    return {"prediction": LABELS[pred]}
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "model_loaded": True}
-
-# This is for local development only
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=10000)
+    proba = clf.predict_proba(X_test)[0]
+    pred = proba.argmax()
+    confidence = float(proba[pred])
+    label = LABELS[pred]
+    # إذا الثقة أقل من 0.5 اعتبرها Other
+    if confidence < 0.5:
+        label = "Other"
+    return {"prediction": label, "confidence": confidence}
