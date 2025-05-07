@@ -7,7 +7,7 @@ import numpy as np
 LABELS = ["Extraction", "Filling", "Root Canal", "Cleaning", "Initial Checkup", "Other"]
 
 train_texts = [
-    # Extraction
+    # Extraction (10)
     "My tooth is loose and needs to be pulled.",
     "I need to have my tooth removed.",
     "My wisdom tooth is causing problems and should be extracted.",
@@ -18,7 +18,7 @@ train_texts = [
     "pull my tooth",
     "tooth extraction",
     "tooth pulled",
-    # Filling
+    # Filling (10)
     "I have a cavity in my tooth.",
     "My tooth hurts when I eat sweets.",
     "I need a filling for my tooth.",
@@ -28,7 +28,8 @@ train_texts = [
     "fill my tooth",
     "cavity filling",
     "I need a dental filling.",
-    # Root Canal
+    "tooth has a cavity",
+    # Root Canal (10)
     "My tooth pain is deep and throbbing, especially at night.",
     "I have pain radiating from my tooth to my ear.",
     "root canal",
@@ -39,7 +40,7 @@ train_texts = [
     "canal",
     "root",
     "nerve treatment",
-    # Cleaning
+    # Cleaning (10)
     "I want a dental cleaning.",
     "I need my teeth cleaned.",
     "cleaning",
@@ -49,7 +50,8 @@ train_texts = [
     "polishing",
     "remove tartar",
     "I want to whiten my teeth.",
-    # Initial Checkup
+    "book a cleaning appointment",
+    # Initial Checkup (10)
     "I want a dental checkup.",
     "I need a routine dental exam.",
     "checkup",
@@ -58,7 +60,9 @@ train_texts = [
     "I want to get my teeth checked.",
     "consultation",
     "I want to see a dentist.",
-    # Other
+    "book a checkup",
+    "schedule a dental exam",
+    # Other (10)
     "hello",
     "weather is nice",
     "I like pizza",
@@ -68,32 +72,15 @@ train_texts = [
     "What is the time?",
     "This is a random sentence.",
     "I love programming.",
-    "The sky is blue.",
-    "pizzza",
-    "rootz",
-    "canalization",
-    "unrelated",
-    "nonsense",
-    "asdfghjkl",
-    "qwerty",
-    "blabla",
-    "test",
-    "music",
-    "movie",
-    "shopping",
-    "I want to travel.",
-    "I am hungry.",
-    "I want to sleep.",
-    "dog",
-    "cat"
+    "The sky is blue."
 ]
 train_labels = (
     [0]*10 +  # Extraction
-    [1]*9 +   # Filling
+    [1]*10 +  # Filling
     [2]*10 +  # Root Canal
-    [3]*9 +   # Cleaning
-    [4]*8 +   # Initial Checkup
-    [5]*20    # Other
+    [3]*10 +  # Cleaning
+    [4]*10 +  # Initial Checkup
+    [5]*10    # Other
 )
 
 vectorizer = TfidfVectorizer(lowercase=True)
@@ -115,3 +102,20 @@ def predict(text):
     if confidence < 0.5:
         return "Other", float(confidence)
     return LABELS[pred], float(confidence)
+
+# اختبر النموذج
+if __name__ == '__main__':
+    for test in [
+        "I want a dental cleaning",
+        "My tooth is loose and needs to be pulled.",
+        "hello",
+        "I have a cavity in my tooth.",
+        "My tooth pain is deep and throbbing, especially at night.",
+        "I want a dental checkup.",
+        "I love programming.",
+        "root",
+        "canal",
+        "pizzza",
+        "nonsense"
+    ]:
+        print(f"{test} => {predict(test)}")
